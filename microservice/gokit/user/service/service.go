@@ -7,18 +7,13 @@ import (
 	"gostudy/microservice/gokit/user/pb"
 )
 
-type Service interface {
-	Login(ctx context.Context, in *pb.LoginReq) (ack *pb.LoginRes, err error)
-}
+type baseServer struct{}
 
-type baseServer struct {
-	//logger *zap.Logger
-}
-
-func NewService() Service {
+func NewService() pb.UserServer {
 	return &baseServer{}
 }
 
+// Login logic
 func (s baseServer) Login(ctx context.Context, in *pb.LoginReq) (tok *pb.LoginRes, err error) {
 	fmt.Println("调用 service Login 处理请求")
 	if in.Username != "LeonardWang" || in.Password != "123456" {

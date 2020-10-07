@@ -1,29 +1,29 @@
 package main
 
 import (
-	grpctransport "github.com/go-kit/kit/transport/grpc"
+	"net"
+	"os"
+
 	"google.golang.org/grpc"
+
 	"gostudy/microservice/gokit/user/endpoint"
 	"gostudy/microservice/gokit/user/pb"
 	"gostudy/microservice/gokit/user/service"
 	"gostudy/microservice/gokit/user/transport"
-	"net"
-	"os"
 )
 
 func main() {
-	server := service.NewService()
-	endpoints := endpoint.NewEndPointServer(server)
+	ser := service.NewService()
+	endpoints := endpoint.NewEndPointServer(ser)
 	grpcServer := transport.NewGRPCServer(endpoints)
+
 	grpcListener, err := net.Listen("tcp", ":8881")
 	if err != nil {
-		//utils.GetLogger().Warn("Listen", zap.Error(err))
 		os.Exit(0)
 	}
-	baseServer := grpc.NewServer(grpc.UnaryInterceptor(grpctransport.Interceptor))
-	pb.RegisterUserServer(baseServer, grpcServer)
-	if err = baseServer.Serve(grpcListener); err != nil {
-		//utils.GetLogger().Warn("Serve", zap.Error(err))
+	gs := grpc.NewServer()
+	pb.RegisterUserServer(gs, grpcServer)
+	if err = gs.Serve(grpcListener); err != nil {
 		os.Exit(0)
 	}
 }
