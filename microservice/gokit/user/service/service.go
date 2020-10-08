@@ -4,23 +4,33 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gostudy/microservice/gokit/user/pb"
+
+	userpb "gostudy/microservice/gokit/user/pb"
 )
+
+var userDate = make(map[string]string)
 
 type baseServer struct{}
 
-func NewService() pb.UserServer {
+func NewService() userpb.UserServer {
 	return &baseServer{}
 }
 
-// Login logic
-func (s baseServer) Login(ctx context.Context, in *pb.LoginReq) (tok *pb.LoginRes, err error) {
-	fmt.Println("调用 service Login 处理请求")
-	if in.Username != "LeonardWang" || in.Password != "123456" {
-		err = errors.New("用户信息错误")
-		return
+// Regist logic
+func (s baseServer) Regist(ctx context.Context, in *userpb.RegistReq) (tok *userpb.RegistResp, err error) {
+	fmt.Println("调用 service Regist 处理请求")
+	if _, ok := userDate[in.Username]; !ok {
+		userDate[in.Username] = in.Password
+		return &userpb.RegistResp{Message: "Ok"}, nil
 	}
-	tok = &pb.LoginRes{Token: "Test Token"}
-	err = nil
-	return
+	return nil, errors.New("用户已注册")
+}
+
+// Login logic
+func (s baseServer) Login(ctx context.Context, in *userpb.LoginReq) (tok *userpb.LoginResp, err error) {
+	fmt.Println("调用 service Login 处理请求")
+	if password, ok := userDate[in.Username]; ok && password == in.Password {
+		return &userpb.LoginResp{Token: "Test Token"}, nil
+	}
+	return nil, errors.New("用户信息错误")
 }

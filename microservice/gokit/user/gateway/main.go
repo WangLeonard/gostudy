@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/sd"
@@ -14,14 +16,16 @@ import (
 	"github.com/go-kit/kit/sd/lb"
 	"google.golang.org/grpc"
 
-	"gostudy/microservice/gokit/user/pb"
+	userpb "gostudy/microservice/gokit/user/pb"
 )
+
+var etcdAddr = "127.0.0.1:2379"
 
 func main() {
 
 	ctx := context.Background()
 	//Etcd客户端
-	client, _ := etcdv3.NewClient(ctx, []string{"127.0.0.1:2379"}, etcdv3.ClientOptions{})
+	client, _ := etcdv3.NewClient(ctx, []string{etcdAddr}, etcdv3.ClientOptions{})
 
 	//服务实例
 	instancer, _ := etcdv3.NewInstancer(client, "svc.user", log.NewNopLogger())
@@ -31,20 +35,49 @@ func main() {
 	//创建负载均衡器
 	balancer := lb.NewRoundRobin(endpointer)
 
-	reqEndPoint := lb.Retry(3, 3*time.Second, balancer)
+	reqEndPoint := lb.Retry(1, 3*time.Second, balancer)
 
-	//现在我们可以通过 endPoint 发起请求了
-	req := &pb.LoginReq{
-		Username: "LeonardWang",
-		Password: "123456",
+	registHandle := func(c *gin.Context) {
+		var registReq = &userpb.RegistReq{}
+		c.ShouldBindJSON(registReq)
+		fmt.Println("registReq:", registReq)
+
+		if res, err := reqEndPoint(ctx, registReq); err != nil {
+			fmt.Println("err:", err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err,
+			})
+		} else {
+			fmt.Println("message:", res)
+			c.JSON(http.StatusOK, gin.H{
+				"message": res.(*userpb.RegistResp).Message,
+			})
+		}
 	}
-	if res, err := reqEndPoint(ctx, req); err != nil {
+
+	loginHandle := func(c *gin.Context) {
+		var loginReq = &userpb.LoginReq{}
+		c.ShouldBindJSON(loginReq)
+
+		if res, err := reqEndPoint(ctx, loginReq); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err,
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"message": res.(*userpb.LoginResp).Token,
+			})
+		}
+	}
+
+	r := gin.Default()
+	ApiGroup := r.Group("")
+	ApiGroup.GET("/regist", registHandle)
+	ApiGroup.GET("/login", loginHandle)
+
+	if err := r.Run(); err != nil {
 		panic(err)
-	} else {
-		fmt.Println(res, err)
 	}
-
-	return
 }
 
 //通过传入的 实例地址  创建对应的请求endPoint
@@ -59,9 +92,11 @@ func reqFactory(instanceAddr string) (endpoint.Endpoint, io.Closer, error) {
 			panic("connect error")
 		}
 		defer conn.Close()
-		svr := pb.NewUserClient(conn)
+		svr := userpb.NewUserClient(conn)
 		switch t := request.(type) {
-		case *pb.LoginReq:
+		case *userpb.RegistReq:
+			return svr.Regist(ctx, t)
+		case *userpb.LoginReq:
 			return svr.Login(ctx, t)
 		default:
 			return nil, errors.New("Unknown Type")

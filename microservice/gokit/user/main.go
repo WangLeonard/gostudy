@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 
 	"gostudy/microservice/gokit/user/endpoint"
-	"gostudy/microservice/gokit/user/pb"
+	userpb "gostudy/microservice/gokit/user/pb"
 	"gostudy/microservice/gokit/user/service"
 	"gostudy/microservice/gokit/user/transport"
 )
@@ -44,7 +44,7 @@ func main() {
 	Registar.Register()
 
 	ser := service.NewService()
-	endpoints := endpoint.NewEndPointServer(ser)
+	endpoints := endpoint.NewUserEndPointServer(ser)
 	grpcServer := transport.NewGRPCServer(endpoints)
 
 	grpcListener, err := net.Listen("tcp", grpcAddr)
@@ -52,7 +52,7 @@ func main() {
 		os.Exit(0)
 	}
 	gs := grpc.NewServer()
-	pb.RegisterUserServer(gs, grpcServer)
+	userpb.RegisterUserServer(gs, grpcServer)
 	if err = gs.Serve(grpcListener); err != nil {
 		os.Exit(0)
 	}

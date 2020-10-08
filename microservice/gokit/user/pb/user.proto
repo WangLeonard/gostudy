@@ -1,9 +1,18 @@
 syntax = "proto3";
-package pb;
+package userpb;
 
 service User {
-  rpc Login (LoginReq) returns (LoginRes) {
-  }
+  rpc Regist (RegistReq) returns (RegistResp) {}
+  rpc Login (LoginReq) returns (LoginResp) {}
+}
+
+message RegistReq {
+  string Username = 1;
+  string Password = 2;
+}
+
+message RegistResp {
+  string Message = 1;
 }
 
 message LoginReq {
@@ -11,6 +20,6 @@ message LoginReq {
   string Password = 2;
 }
 
-message LoginRes {
+message LoginResp {
   string Token = 1;
 }
