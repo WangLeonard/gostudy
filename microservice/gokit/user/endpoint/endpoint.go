@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kit/kit/endpoint"
 
@@ -36,11 +37,24 @@ func (s EndPointServer) Login(ctx context.Context, in *userpb.LoginReq) (*userpb
 	return res.(*userpb.LoginResp), nil
 }
 
+func middleware(s string) endpoint.Middleware {
+	return func(next endpoint.Endpoint) endpoint.Endpoint {
+		return func(ctx context.Context, request interface{}) (interface{}, error) {
+			fmt.Println(s, "in")
+			defer fmt.Println(s, "out")
+			return next(ctx, request)
+		}
+	}
+}
+
 func makeRegistEndPoint(s userpb.UserServer) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	f := func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(*userpb.RegistReq)
 		return s.Regist(ctx, req)
 	}
+	return endpoint.Chain(
+		middleware("Regist"),
+	)(f)
 }
 
 func makeLoginEndPoint(s userpb.UserServer) endpoint.Endpoint {

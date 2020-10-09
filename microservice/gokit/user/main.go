@@ -18,6 +18,7 @@ import (
 )
 
 func main() {
+	// TODO: use config file.
 	var (
 		etcdAddrs = []string{"127.0.0.1:2379"}
 		serName   = "svc.user"
