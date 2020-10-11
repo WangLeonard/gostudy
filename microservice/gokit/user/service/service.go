@@ -1,3 +1,6 @@
+// package service implement user logic
+// TODO: Automatic generated part content by pb(except logic implement).
+
 package service
 
 import (

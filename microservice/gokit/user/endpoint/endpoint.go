@@ -1,3 +1,6 @@
+// package endpoint trans logic to endpoint
+// TODO: Automatic generated the file by pb (except middleware).
+
 package endpoint
 
 import (

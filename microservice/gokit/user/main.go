@@ -26,7 +26,7 @@ func main() {
 		ttl       = 5 * time.Second
 	)
 
-	//初始化etcd客户端
+	// 初始化etcd客户端
 	options := etcdv3.ClientOptions{
 		DialTimeout:   ttl,
 		DialKeepAlive: ttl,
@@ -41,9 +41,10 @@ func main() {
 		Value: grpcAddr,
 	}, log.NewNopLogger())
 
-	// Register etcd
+	// 注册 etcd
 	Registar.Register()
 
+	// 初始化grpc处理逻辑
 	ser := service.NewService()
 	endpoints := endpoint.NewUserEndPointServer(ser)
 	grpcServer := transport.NewGRPCServer(endpoints)
@@ -52,8 +53,11 @@ func main() {
 	if err != nil {
 		os.Exit(0)
 	}
+	// 建立 grpc 服务端
 	gs := grpc.NewServer()
+	// 注册 grpc 服务端
 	userpb.RegisterUserServer(gs, grpcServer)
+	// 启动监听
 	if err = gs.Serve(grpcListener); err != nil {
 		os.Exit(0)
 	}

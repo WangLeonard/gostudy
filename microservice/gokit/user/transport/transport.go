@@ -1,3 +1,6 @@
+// package transport trans endpoint to grpc
+// TODO: Automatic generated the file by pb.
+
 package transport
 
 import (
