@@ -16,22 +16,15 @@ import (
 	"github.com/go-kit/kit/sd/lb"
 	"google.golang.org/grpc"
 
-	userpb "gostudy/microservice/gokit/user/pb"
+	userpb "gostudy/microservice/gokit/demo/rpc/user/pb"
 )
 
-var etcdAddr = "127.0.0.1:2379"
-
-func main() {
-
-	ctx := context.Background()
-	//Etcd客户端
-	client, _ := etcdv3.NewClient(ctx, []string{etcdAddr}, etcdv3.ClientOptions{})
-
+func ConnectUserService(ctx context.Context, etcdClient etcdv3.Client, ginGroup *gin.RouterGroup) {
 	//服务实例
-	instancer, _ := etcdv3.NewInstancer(client, "svc.user", log.NewNopLogger())
+	instancer, _ := etcdv3.NewInstancer(etcdClient, "svc.user", log.NewNopLogger())
 
 	//创建端点管理器， 此管理器根据Factory和监听的到实例创建endPoint并订阅instancer的变化动态更新Factory创建的endPoint
-	endpointer := sd.NewEndpointer(instancer, reqFactory, log.NewNopLogger()) //reqFactory自定义的函数，主要用于端点层（endpoint）接受并显示数据
+	endpointer := sd.NewEndpointer(instancer, userReqFactory, log.NewNopLogger()) //reqFactory自定义的函数，主要用于端点层（endpoint）接受并显示数据
 	//创建负载均衡器
 	balancer := lb.NewRoundRobin(endpointer)
 
@@ -69,19 +62,14 @@ func main() {
 			})
 		}
 	}
+	userGroup := ginGroup.Group("user")
 
-	r := gin.Default()
-	ApiGroup := r.Group("")
-	ApiGroup.GET("/regist", registHandle)
-	ApiGroup.GET("/login", loginHandle)
-
-	if err := r.Run(); err != nil {
-		panic(err)
-	}
+	userGroup.GET("/regist", registHandle)
+	userGroup.GET("/login", loginHandle)
 }
 
 //通过传入的 实例地址  创建对应的请求endPoint
-func reqFactory(instanceAddr string) (endpoint.Endpoint, io.Closer, error) {
+func userReqFactory(instanceAddr string) (endpoint.Endpoint, io.Closer, error) {
 	fmt.Println("instanceAddr:", instanceAddr)
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		fmt.Println("请求服务: ", instanceAddr)
