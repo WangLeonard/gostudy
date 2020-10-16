@@ -19,6 +19,7 @@ func main() {
 
 	// register user client.
 	ConnectUserService(ctx, client, ApiGroup)
+	ConnectFileService(ctx, client, ApiGroup)
 
 	if err := r.Run(); err != nil {
 		panic(err)
