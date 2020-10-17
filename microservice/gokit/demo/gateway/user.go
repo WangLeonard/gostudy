@@ -14,9 +14,9 @@ import (
 	"github.com/go-kit/kit/sd"
 	"github.com/go-kit/kit/sd/etcdv3"
 	"github.com/go-kit/kit/sd/lb"
-	"google.golang.org/grpc"
 
-	userpb "gostudy/microservice/gokit/demo/rpc/user/pb"
+	"gostudy/microservice/gokit/demo/gateway/clients"
+	userpb "gostudy/microservice/gokit/demo/service/user/pb"
 )
 
 func ConnectUserService(ctx context.Context, etcdClient etcdv3.Client, ginGroup *gin.RouterGroup) {
@@ -73,13 +73,12 @@ func userReqFactory(instanceAddr string) (endpoint.Endpoint, io.Closer, error) {
 	fmt.Println("instanceAddr:", instanceAddr)
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		fmt.Println("请求服务: ", instanceAddr)
-		conn, err := grpc.Dial(instanceAddr, grpc.WithInsecure())
+		conn, err := clients.GetClient(instanceAddr)
 		fmt.Println("new conn!")
 		if err != nil {
 			fmt.Println(err)
 			panic("connect error")
 		}
-		defer conn.Close()
 		svr := userpb.NewUserClient(conn)
 		switch t := request.(type) {
 		case *userpb.RegistReq:

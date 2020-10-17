@@ -8,8 +8,8 @@ import (
 
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 
-	"gostudy/microservice/gokit/demo/rpc/user/endpoint"
-	userpb "gostudy/microservice/gokit/demo/rpc/user/pb"
+	"gostudy/microservice/gokit/demo/service/user/endpoint"
+	userpb "gostudy/microservice/gokit/demo/service/user/pb"
 )
 
 type grpcServer struct {

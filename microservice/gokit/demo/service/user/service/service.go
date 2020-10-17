@@ -8,8 +8,8 @@ import (
 	"errors"
 	"fmt"
 
-	"gostudy/microservice/gokit/demo/rpc/user/model"
-	userpb "gostudy/microservice/gokit/demo/rpc/user/pb"
+	"gostudy/microservice/gokit/demo/service/user/model"
+	userpb "gostudy/microservice/gokit/demo/service/user/pb"
 )
 
 var userDate = make(map[string]string)

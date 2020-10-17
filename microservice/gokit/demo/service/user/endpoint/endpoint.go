@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-kit/kit/endpoint"
 
-	userpb "gostudy/microservice/gokit/demo/rpc/user/pb"
+	userpb "gostudy/microservice/gokit/demo/service/user/pb"
 )
 
 type EndPointServer struct {

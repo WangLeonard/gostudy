@@ -70,7 +70,7 @@ func main() {
 	var (
 		etcdAddrs = []string{"127.0.0.1:2379"}
 		serName   = "svc.file"
-		grpcAddr  = "127.0.0.1:8882"
+		httpAddr  = "127.0.0.1:8882"
 		ttl       = 5 * time.Second
 	)
 
@@ -86,7 +86,7 @@ func main() {
 	}
 	Registar := etcdv3.NewRegistrar(etcdClient, etcdv3.Service{
 		Key:   serName,
-		Value: grpcAddr,
+		Value: httpAddr,
 	}, log.NewNopLogger())
 
 	// 注册 etcd
@@ -100,5 +100,5 @@ func main() {
 		FileUploadAndDownloadGroup.POST("/upload", UploadHandler) // 上传文件
 	}
 
-	Router.Run(":8882")
+	Router.Run(httpAddr)
 }

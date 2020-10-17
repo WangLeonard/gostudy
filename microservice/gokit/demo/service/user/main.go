@@ -11,10 +11,10 @@ import (
 	"github.com/go-kit/kit/sd/etcdv3"
 	"google.golang.org/grpc"
 
-	"gostudy/microservice/gokit/demo/rpc/user/endpoint"
-	userpb "gostudy/microservice/gokit/demo/rpc/user/pb"
-	"gostudy/microservice/gokit/demo/rpc/user/service"
-	"gostudy/microservice/gokit/demo/rpc/user/transport"
+	"gostudy/microservice/gokit/demo/service/user/endpoint"
+	userpb "gostudy/microservice/gokit/demo/service/user/pb"
+	"gostudy/microservice/gokit/demo/service/user/service"
+	"gostudy/microservice/gokit/demo/service/user/transport"
 )
 
 func main() {
